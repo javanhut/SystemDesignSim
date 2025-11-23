@@ -583,10 +583,15 @@ func (gs *GameScreen) createControlsPanel() fyne.CanvasObject {
 		gs.showSystemPlan()
 	})
 
+	hintsBtn := widget.NewButton("Show Hints", func() {
+		gs.showArchitecturalHintsDialog()
+	})
+
 	return container.NewHBox(
 		gs.playButton,
 		gs.stopButton,
 		gs.submitButton,
+		hintsBtn,
 		controlCenterBtn,
 		planBtn,
 		backButton,
@@ -806,6 +811,37 @@ func (gs *GameScreen) showSystemPlan() {
 	modal.Resize(fyne.NewSize(520, 480))
 	modal.Show()
 }
+
+func (gs *GameScreen) showArchitecturalHintsDialog() {
+	title := widget.NewLabel("System Design Hints")
+	title.TextStyle = fyne.TextStyle{Bold: true}
+	title.Alignment = fyne.TextAlignCenter
+
+	hintsText := gs.getArchitecturalHints()
+	hintsLabel := widget.NewLabel(hintsText)
+	hintsLabel.Wrapping = fyne.TextWrapWord
+
+	var modal *widget.PopUp
+	closeBtn := widget.NewButton("Close", func() {
+		if modal != nil {
+			modal.Hide()
+		}
+	})
+
+	scrollContent := container.NewVScroll(hintsLabel)
+	content := container.NewBorder(
+		container.NewVBox(title, widget.NewSeparator()),
+		closeBtn,
+		nil,
+		nil,
+		scrollContent,
+	)
+
+	modal = widget.NewModalPopUp(content, gs.window.Canvas())
+	modal.Resize(fyne.NewSize(700, 600))
+	modal.Show()
+}
+
 func (gs *GameScreen) addComponent(compType gui.ComponentType) {
 	gs.componentCounter++
 	id := fmt.Sprintf("%s-%d", compType, gs.componentCounter)
@@ -1126,14 +1162,20 @@ func (gs *GameScreen) getCheckmark(passed bool) string {
 }
 
 func (gs *GameScreen) getArchitecturalHints() string {
-	hints := "Hints for Success:\n\n"
+	hints := "SYSTEM DESIGN PRINCIPLES:\n\n"
 
 	// Analyze current architecture
 	hasCache := false
 	hasLoadBalancer := false
 	hasCDN := false
+	hasGateway := false
+	hasFirewall := false
+	hasDatabase := false
+	apiServerCount := 0
+	totalComponents := 0
 
 	for _, comp := range gs.canvas.GetComponents() {
+		totalComponents++
 		switch comp.Type {
 		case gui.ComponentTypeCache:
 			hasCache = true
@@ -1141,50 +1183,174 @@ func (gs *GameScreen) getArchitecturalHints() string {
 			hasLoadBalancer = true
 		case gui.ComponentTypeCDN:
 			hasCDN = true
+		case gui.ComponentTypeGateway:
+			hasGateway = true
+		case gui.ComponentTypeFirewall:
+			hasFirewall = true
+		case gui.ComponentTypeDatabase:
+			hasDatabase = true
+		case gui.ComponentTypeAPIServer:
+			apiServerCount++
 		}
 	}
 
-	// Provide targeted hints based on requirements and current state
-	if gs.level.Requirements.MaxLatencyP99.Milliseconds() < 100 {
-		hints += "• Low latency required:\n"
-		if !hasCache {
-			hints += "  - Add Cache to reduce DB latency ✗\n"
+	// Always show core architecture pattern
+	hints += "1. REQUEST FLOW PATTERN\n"
+	hints += "   Basic: User → API Server → Database\n"
+	hints += "   Production: User → Gateway → Firewall → LB → API → Cache → DB\n\n"
+
+	hints += "   WHY: Defense in Depth + Performance + Scalability\n"
+	if totalComponents == 0 {
+		hints += "   ⚠ Start by adding components from the toolbox!\n"
+		hints += "   Quick start: Add API Server + Database\n"
+	} else {
+		if !hasGateway {
+			hints += "   • Gateway (MISSING ✗): Single entry point.\n"
+			hints += "     Handles: Rate limiting, request validation, TLS\n"
 		} else {
-			hints += "  - Cache in place ✓\n"
+			hints += "   • Gateway ✓: Entry point secured\n"
 		}
-		if !hasCDN {
-			hints += "  - Add CDN for static content ✗\n"
+
+		if !hasFirewall {
+			hints += "   • Firewall (MISSING ✗): Network security layer.\n"
+			hints += "     Handles: DDoS, IP filtering, WAF rules\n"
 		} else {
-			hints += "  - CDN in place ✓\n"
+			hints += "   • Firewall ✓: Network security active\n"
 		}
-	}
 
-	if gs.level.Requirements.MinUptime > 0.99 {
-		hints += "• High availability required:\n"
-		if !hasLoadBalancer {
-			hints += "  - Add Load Balancer for redundancy ✗\n"
+		if !hasDatabase {
+			hints += "   • Database (MISSING ✗): Persistent storage needed!\n"
+			hints += "     Handles: Data persistence, queries, transactions\n"
 		} else {
-			hints += "  - Load Balancer in place ✓\n"
-		}
-		hints += "  - Connect multiple servers\n"
-	}
-
-	if gs.level.PeakUsers > 1000 {
-		hints += "• High traffic expected:\n"
-		hints += "  - Use Load Balancer to distribute load\n"
-		hints += "  - Add Cache to reduce DB pressure\n"
-		if !hasCDN {
-			hints += "  - Add CDN for static assets ✗\n"
+			hints += "   • Database ✓: Data persistence ready\n"
 		}
 	}
 
-	// Architecture flow hints
-	hints += "\nRecommended Flow:\n"
-	hints += "User → Gateway → Load Balancer\n"
-	hints += "  → API Server → Cache → Database\n"
-	if gs.level.Requirements.RequireCDN {
-		hints += "  → CDN (for static content)\n"
+	// Always show scalability principles
+	hints += "\n2. HORIZONTAL SCALABILITY\n"
+	hints += "   Principle: Scale out (add servers), not up (bigger servers)\n"
+	hints += "   WHY: Cost-effective, fault-tolerant, elastic\n\n"
+
+	if !hasLoadBalancer {
+		hints += "   • Load Balancer (MISSING ✗):\n"
+		hints += "     WHY: Distributes requests across N servers\n"
+		hints += "     Enables: Zero-downtime, auto-failover, health checks\n"
+		hints += "     Algorithms: Round-robin, least-conn, IP-hash\n"
+		hints += "     Real-world: AWS ELB, NGINX, HAProxy\n"
+	} else {
+		hints += "   • Load Balancer ✓: Ready for horizontal scaling\n"
+		if apiServerCount < 2 {
+			hints += "   ⚠ Add 2+ API servers for true redundancy!\n"
+			hints += "     Pattern: Active-Active (N servers sharing load)\n"
+		} else {
+			hints += "   • " + fmt.Sprintf("%d", apiServerCount) + " API servers ✓: Redundancy achieved\n"
+			hints += "     Load distributed: ~" + fmt.Sprintf("%.0f", 100.0/float64(apiServerCount)) + "% per server\n"
+		}
 	}
+
+	// Latency optimization - show for all levels with specific targets
+	hints += "\n3. LATENCY OPTIMIZATION\n"
+	targetLatency := gs.level.Requirements.MaxLatencyP99.Milliseconds()
+	hints += fmt.Sprintf("   Target: P99 < %dms\n", targetLatency)
+	hints += "   Principle: Every millisecond matters at scale\n\n"
+
+	if !hasCache {
+		hints += "   • Cache (MISSING ✗): Critical for low latency!\n"
+		hints += "     WHY: Database queries = 10-50ms\n"
+		hints += "          Cache reads = 1-2ms (10-50x faster)\n"
+		hints += "     Patterns: Cache-aside, write-through, write-behind\n"
+		hints += "     Use for: User sessions, hot data, computed results\n"
+		hints += "     Tech: Redis, Memcached, ElastiCache\n"
+	} else {
+		hints += "   • Cache ✓: Latency killer deployed\n"
+		hints += "     Expected: 80-95% cache hit rate\n"
+		hints += "     Connect: API → Cache (check) → DB (on miss)\n"
+	}
+
+	if !hasCDN && targetLatency < 200 {
+		hints += "   • CDN (MISSING ✗): Geographic latency matters!\n"
+		hints += "     WHY: Edge caching + geographic distribution\n"
+		hints += "     Benefit: 50-90% faster for static assets\n"
+		hints += "     Handles: Images, CSS, JS, videos\n"
+		hints += "     Tech: CloudFront, Cloudflare, Fastly\n"
+	} else if hasCDN {
+		hints += "   • CDN ✓: Edge caching active\n"
+		hints += "     Global PoPs serve content from nearest location\n"
+	}
+
+	// High availability - always important
+	minUptime := gs.level.Requirements.MinUptime * 100
+	hints += "\n4. HIGH AVAILABILITY\n"
+	hints += fmt.Sprintf("   Target: %.2f%% uptime ", minUptime)
+	if minUptime >= 99.9 {
+		hints += "(3 nines = 8.76hr downtime/year)\n"
+	} else if minUptime >= 99.0 {
+		hints += "(2 nines = 3.65 days downtime/year)\n"
+	} else {
+		hints += "\n"
+	}
+	hints += "   Principle: Eliminate Single Points of Failure (SPOFs)\n\n"
+
+	hints += "   Required components:\n"
+	if !hasLoadBalancer {
+		hints += "   • Load Balancer ✗: Needed for health checks & failover\n"
+		hints += "     Detects failures: TCP checks every 5-30s\n"
+		hints += "     Auto-failover: Routes traffic to healthy servers\n"
+	} else {
+		hints += "   • Load Balancer ✓: Health monitoring active\n"
+	}
+
+	if apiServerCount < 2 {
+		hints += "   • 2+ API Servers ✗: SPOF exists!\n"
+		hints += "     WHY: If 1 server fails with no backup = 100% downtime\n"
+		hints += "     N servers: Failure of 1 = only 1/N capacity loss\n"
+	} else {
+		hints += "   • " + fmt.Sprintf("%d", apiServerCount) + " API Servers ✓: No SPOF\n"
+		hints += "     Can survive " + fmt.Sprintf("%d", apiServerCount-1) + " server failures\n"
+	}
+
+	hints += "\n   Best practices:\n"
+	hints += "   • Multi-AZ: Deploy across 2+ availability zones\n"
+	hints += "   • Health checks: Heartbeat + deep health endpoint\n"
+	hints += "   • Graceful degradation: Serve cached data on DB failure\n"
+
+	// Traffic handling - show for all levels
+	hints += "\n5. TRAFFIC HANDLING\n"
+	hints += fmt.Sprintf("   Peak load: %d concurrent users\n", gs.level.PeakUsers)
+	hints += "   Principle: Design for peak, not average\n\n"
+
+	hints += "   Load distribution:\n"
+	hints += "   • Load Balancer: Distribute requests evenly\n"
+	hints += "   • Cache: Reduce DB queries by 80-90%\n"
+	if apiServerCount > 1 {
+		hints += fmt.Sprintf("   • %d servers handle: ~%d users each\n", apiServerCount, gs.level.PeakUsers/apiServerCount)
+	}
+
+	hints += "\n   Database scaling:\n"
+	hints += "   • Read replicas: Scale read-heavy workloads\n"
+	hints += "   • Write sharding: Partition data across DBs\n"
+	hints += "   • Connection pooling: Reuse connections (max ~100/server)\n"
+	hints += "   • Indexing: B-tree indexes on frequent queries\n"
+
+	// Cost optimization - always relevant
+	hints += "\n6. COST OPTIMIZATION\n"
+	hints += "   Budget: $" + fmt.Sprintf("%.2f", gs.level.Budget) + "/hr\n"
+	hints += "   Principle: Optimize for cost/performance ratio\n\n"
+
+	hints += "   Cost savers:\n"
+	hints += "   • Cache: 90% fewer DB queries → smaller DB instance\n"
+	hints += "   • CDN: Reduced origin bandwidth costs\n"
+	hints += "   • Right-sizing: Don't over-provision\n"
+	hints += "   • Auto-scaling: Scale down during low traffic\n"
+	hints += "   • Reserved instances: 30-60% discount vs on-demand\n"
+
+	// Common anti-patterns
+	hints += "\n7. COMMON MISTAKES TO AVOID\n"
+	hints += "   ✗ Single API server (SPOF)\n"
+	hints += "   ✗ No caching (high latency + DB overload)\n"
+	hints += "   ✗ No load balancer (can't scale horizontally)\n"
+	hints += "   ✗ Direct DB access from internet (security risk)\n"
+	hints += "   ✗ No monitoring (can't debug issues)\n"
 
 	return hints
 }

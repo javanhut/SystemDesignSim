@@ -249,13 +249,38 @@ The game provides comprehensive architectural hints to help you design better sy
 - `Space`: Play/Pause simulation
 - `Esc`: Deselect all
 
+## Design Patterns Tutorial
+
+NEW! Learn system design patterns through interactive tutorials:
+
+**Access**: Click "Design Patterns Tutorial" on Level Select screen or "Learn Patterns" in-game
+
+**Available Patterns**:
+1. **Load Balancing** - Horizontal scaling with traffic distribution
+2. **Cache-Aside** - Performance optimization through caching
+3. **Read Replicas** - Database scalability for read-heavy workloads
+
+**Two Modes**:
+- **Watch Demo**: Automated 60-90 second walkthrough with animations
+- **Practice Mode**: Build the pattern yourself with guided validation
+
+Each pattern includes:
+- Problem and solution explanation
+- Real-world examples (Netflix, Facebook, GitHub, etc.)
+- Benefits and trade-offs
+- Step-by-step demonstrations
+- Hands-on practice with instant feedback
+
+See [docs/DESIGN_PATTERNS.md](DESIGN_PATTERNS.md) for complete documentation.
+
 ## Next Steps
 
 - Complete Level 1 with a perfect score
+- Learn design patterns through the tutorial system
 - Try different architectures for the same level
 - Read the Architecture documentation in docs/
 - Explore the source code to understand simulations
-- Contribute new components or levels!
+- Contribute new components, levels, or patterns!
 
 ## Troubleshooting
 

@@ -13,6 +13,7 @@
 │                  Level Selection Screen                      │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │  System Design Simulator                             │   │
+│  │  [View Tutorial] [Design Patterns Tutorial]          │   │
 │  │                                                       │   │
 │  │  ┌───────────────────────────────────────────────┐  │   │
 │  │  │ Level 1: Local Blog             [Unlocked]    │  │   │
@@ -28,9 +29,44 @@
 │  │                                                       │   │
 │  │  ... more levels ...                                 │   │
 │  └─────────────────────────────────────────────────────┘   │
-└────────────────────────┬────────────────────────────────────┘
-                         │ Click [Play]
-                         ▼
+└────┬───────────────────────┬────────────────────────────────┘
+     │ Click [Play]          │ Click [Design Patterns]
+     ▼                       ▼
+                    ┌─────────────────────────────────┐
+                    │  Design Pattern Selection       │
+                    │  ┌────────────┐  ┌────────────┐ │
+                    │  │Load Balance│  │Cache-Aside │ │
+                    │  │★★☆☆☆      │  │★★☆☆☆      │ │
+                    │  │[Watch Demo]│  │[Watch Demo]│ │
+                    │  │[Practice]  │  │[Practice]  │ │
+                    │  └────────────┘  └────────────┘ │
+                    │  ┌────────────┐                 │
+                    │  │Read Replica│                 │
+                    │  │★★★☆☆      │                 │
+                    │  │[Watch Demo]│                 │
+                    │  │[Practice]  │                 │
+                    │  └────────────┘                 │
+                    └────────┬────────────────────────┘
+                             │ Click [Watch Demo]
+                             ▼
+                    ┌─────────────────────────────────┐
+                    │  Pattern Tutorial Screen        │
+                    │  ┌──────┬──────────┬─────────┐ │
+                    │  │ Info │ Canvas   │Controls │ │
+                    │  │      │ (Animated│         │ │
+                    │  │Problem│  Demo)  │▶ Play  │ │
+                    │  │      │          │⏸ Pause │ │
+                    │  │Solution│         │↻Restart│ │
+                    │  │      │          │         │ │
+                    │  │Benefits│         │Step 5/12│ │
+                    │  │      │          │█████░░░│ │
+                    │  │Tradeoffs│        │         │ │
+                    │  └──────┴──────────┴─────────┘ │
+                    └─────────────────────────────────┘
+                             │
+                             ▼
+                    [Demo Complete - Try Practice]
+                             ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                       Game Screen                            │
 │ ┌─────────────────────────────────────────────────────────┐ │
@@ -473,6 +509,129 @@ Level 5: Mastery
   Hints Focus: Advanced patterns, trade-offs
 ```
 
+## Design Patterns Tutorial System
+
+### Pattern Learning Flow
+
+```
+User accesses Design Patterns
+         ↓
+Pattern Selection Screen
+  ├─ Grid of pattern cards
+  ├─ Category-based colors
+  ├─ Difficulty indicators (★★★☆☆)
+  └─ Two modes per pattern:
+      ├─ Watch Demo
+      └─ Try Practice
+         ↓
+User clicks "Watch Demo"
+         ↓
+Pattern Tutorial Screen loads
+         ↓
+┌──────────────────────────────────────┐
+│ TutorialOrchestrator starts          │
+│ Executes steps sequentially:         │
+│  1. StepMessage → Show overlay       │
+│  2. StepAddComponent → Fade-in       │
+│  3. StepCreateConnection → Draw line │
+│  4. StepShowTraffic → Spawn particles│
+│  5-12. Continue pattern demo         │
+└──────────────────────────────────────┘
+         ↓
+Progress bar updates (Step N/12)
+         ↓
+Demo completes
+         ↓
+"Try Practice Mode" button enabled
+         ↓
+User clicks "Try Practice"
+         ↓
+Practice Mode starts
+  ├─ Show instruction: "Add a load balancer"
+  ├─ User adds component
+  ├─ Real-time validation
+  ├─ Feedback: "✓ Perfect!" or "✗ Need 1 more..."
+  └─ Next step unlocked when validated
+         ↓
+All practice steps completed
+         ↓
+"Practice Complete!" message
+         ↓
+Return to pattern selection or game
+```
+
+### Pattern Tutorial Architecture
+
+```
+PatternTutorialScreen (UI Layer)
+  ├─ Left Panel: Pattern information
+  │   ├─ Problem statement
+  │   ├─ Solution overview
+  │   ├─ Benefits list
+  │   ├─ Trade-offs list
+  │   └─ Real-world examples
+  │
+  ├─ Center Panel: Interactive canvas
+  │   ├─ Component visualization
+  │   ├─ Connection lines
+  │   ├─ Particle animations
+  │   └─ Message overlays
+  │
+  └─ Right Panel: Controls
+      ├─ Demo controls (Play/Pause/Restart)
+      ├─ Progress tracking
+      ├─ Practice instructions
+      └─ Validation feedback
+
+TutorialOrchestrator (Logic Layer)
+  ├─ Step execution engine
+  ├─ Component spawning
+  ├─ Connection automation
+  ├─ Traffic simulation
+  ├─ Practice validation
+  └─ Animation timing
+
+DesignPattern (Data Layer)
+  ├─ Educational content
+  ├─ Demo steps array
+  ├─ Practice steps array
+  └─ Validation criteria
+```
+
+### Available Patterns
+
+1. **Load Balancing** (Difficulty: 2/5, Category: Scalability)
+   - 12 demo steps showing LB + 3 API servers
+   - 3 practice steps with validation
+   - Real-world: Netflix, AWS ELB, NGINX, HAProxy
+
+2. **Cache-Aside** (Difficulty: 2/5, Category: Performance)
+   - 10 demo steps showing API → Cache → DB flow
+   - 4 practice steps building cache chain
+   - Real-world: Facebook, Twitter, Amazon, Stack Overflow
+
+3. **Read Replicas** (Difficulty: 3/5, Category: Scalability)
+   - 15 demo steps showing primary + 2 replicas
+   - 3 practice steps with replication setup
+   - Real-world: Instagram, GitHub, Shopify, Pinterest
+
+### Pattern Integration Points
+
+**Access from Level Select**:
+- "Design Patterns Tutorial" button
+- Standalone learning mode
+- No prerequisites
+
+**Access from Game Screen**:
+- "Learn Patterns" button in controls
+- Quick reference during gameplay
+- Context-aware recommendations (future)
+
+**Level-Specific Recommendations** (future):
+- Level 2 → Load Balancing pattern
+- Level 3 → Cache-Aside pattern
+- Level 4 → Read Replicas pattern
+
 ## Success!
 
 The game successfully teaches system design through:
@@ -484,3 +643,5 @@ The game successfully teaches system design through:
 6. Comprehensive architectural guidance (hints system)
 7. Context-aware scenario descriptions
 8. System design principles with WHY explanations
+9. **NEW**: Animated pattern tutorials with practice mode
+10. **NEW**: Step-by-step guided learning with validation

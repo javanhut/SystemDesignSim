@@ -661,11 +661,16 @@ func (gs *GameScreen) createControlsPanel() fyne.CanvasObject {
 		gs.showArchitecturalHintsDialog()
 	})
 
+	learnPatternsBtn := widget.NewButton("Learn Patterns", func() {
+		gs.window.SetContent(NewPatternSelectionScreen(gs.window).Build())
+	})
+
 	return container.NewHBox(
 		gs.playButton,
 		gs.stopButton,
 		gs.submitButton,
 		hintsBtn,
+		learnPatternsBtn,
 		controlCenterBtn,
 		planBtn,
 		backButton,

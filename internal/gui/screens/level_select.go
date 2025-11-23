@@ -91,10 +91,16 @@ func (ls *LevelSelectScreen) Build() fyne.CanvasObject {
 		ls.window.SetContent(NewWelcomeScreen(ls.window).Build())
 	})
 
+	designPatternsButton := widget.NewButton("Design Patterns Tutorial", func() {
+		ls.window.SetContent(NewPatternSelectionScreen(ls.window).Build())
+	})
+
+	buttons := container.NewGridWithColumns(2, tutorialButton, designPatternsButton)
+
 	content := container.NewVBox(
 		title,
 		subtitle,
-		tutorialButton,
+		buttons,
 		widget.NewSeparator(),
 		scrollContainer,
 	)

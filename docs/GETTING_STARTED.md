@@ -62,23 +62,43 @@ Note: First build may take 5-10 minutes as Fyne compiles with CGo.
 
 ### Understanding the UI
 
+**Header - Level Title and Scenario**:
+- Displays level name and number
+- Shows detailed scenario information including:
+  - Client name and business type
+  - Current situation and context
+  - User profile (concurrent users, session duration)
+  - Traffic pattern (reads/writes/static content ratio)
+  - Constraints (budget, latency, uptime requirements)
+
 **Left Panel - Toolbox**:
 - Click buttons to add components to the canvas
 - Each component type has different capabilities and costs
+- Includes component descriptions and latency information
+- Help button provides detailed scenario guidance
 
 **Center - Canvas**:
 - Left-click: Select components
-- Right-click + drag: Create connections between components
+- Double-click then target: Create connections between components
 - Drag components to rearrange them
+- Visual particle animations show traffic flow
+- Color-coded health indicators (Green=Healthy, Yellow=Warning, Orange=Critical, Red=Down)
 
 **Right Panel - Metrics**:
-- Real-time performance stats
-- Cost tracking
+- Real-time performance stats (RPS, latency, uptime)
+- Pass/fail indicators for each objective
+- Cost tracking with budget status
 - Level objectives checklist
+- Architecture hints (scrollable)
+- Architecture summary
+- Test plan information
 
 **Bottom - Controls**:
 - Start/Stop simulation
 - Submit your solution
+- Show Hints (popup with detailed system design principles)
+- Control Center (advanced configuration)
+- System Plan (architecture overview)
 - Return to level select
 
 ## Component Types Explained
@@ -116,6 +136,39 @@ Note: First build may take 5-10 minutes as Fyne compiles with CGo.
 - Requires origin server
 - Cost: $0.08/hour + per-region
 - Latency: 2ms (edge hit)
+
+## Using Architectural Hints
+
+The game provides comprehensive architectural hints to help you design better systems:
+
+**Show Hints Button**:
+- Click "Show Hints" in the controls panel to open the hints dialog
+- Hints are also displayed in the right panel (scrollable)
+- Hints dynamically update based on your current architecture
+
+**What Hints Cover**:
+1. Request Flow Pattern - Recommended architecture and component flow
+2. Horizontal Scalability - How to scale out with load balancers and multiple servers
+3. Latency Optimization - Cache strategies, CDN usage, performance targets
+4. High Availability - Eliminating single points of failure, redundancy patterns
+5. Traffic Handling - Load distribution, database scaling, connection pooling
+6. Cost Optimization - Budget management, right-sizing, auto-scaling
+7. Common Mistakes - Anti-patterns to avoid
+
+**Real System Design Principles**:
+- Hints explain WHY each component is needed, not just WHAT to add
+- Includes real-world technologies (Redis, AWS ELB, CloudFront, etc.)
+- Shows specific performance numbers (DB: 10-50ms, Cache: 1-2ms)
+- Explains algorithms (Round-robin, Least-connections, LRU caching)
+- Provides uptime calculations (99.9% = 3 nines = 8.76hr downtime/year)
+
+**How to Use Hints Effectively**:
+1. Read the scenario block at the top to understand the requirements
+2. Click "Show Hints" to see recommended architecture
+3. Add components based on the hints
+4. Watch for checkmarks (✓) or crosses (✗) indicating missing components
+5. Start simulation and monitor real-time pass/fail indicators
+6. Iterate based on performance metrics
 
 ## Tips and Strategies
 

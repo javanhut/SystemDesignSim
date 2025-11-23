@@ -33,23 +33,40 @@
                          ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                       Game Screen                            │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │           Level 1: Local Blog                           │ │
+│ │         Build • Connect • Simulate                      │ │
+│ ├─────────────────────────────────────────────────────────┤ │
+│ │  CLIENT: Personal Blog | BUSINESS: Blogging Platform   │ │
+│ │  SITUATION: Growing audience, need scalable backend    │ │
+│ │  USERS: 10 concurrent (peak: 50) | SESSION: 5min, 3pv  │ │
+│ │  TRAFFIC: 80% reads | 15% writes | 5% static           │ │
+│ │  CONSTRAINTS: Budget $10/hr | P99 < 500ms | Up > 95%   │ │
+│ └─────────────────────────────────────────────────────────┘ │
 │ ┌─────────┬─────────────────────────────┬─────────────────┐ │
 │ │ Toolbox │        Canvas Area          │  Metrics Panel  │ │
 │ │         │                             │                 │ │
-│ │ [API]   │   ┌─────┐      ┌─────┐    │ Level: Blog     │ │
+│ │ [API]   │   ┌─────┐      ┌─────┐    │ Status: ✓ PASS  │ │
 │ │ [DB]    │   │ API │─────▶│ DB  │    │                 │ │
 │ │ [Cache] │   └─────┘      └─────┘    │ Objectives:     │ │
-│ │ [LB]    │                            │ ✓ Latency < 500ms│ │
+│ │ [LB]    │     (particles flowing)    │ ✓ Latency < 500ms│ │
 │ │ [CDN]   │                            │ ✓ Uptime > 95%  │ │
-│ │         │                            │ ○ Cost < $10    │ │
-│ │         │                            │                 │ │
+│ │         │                            │ ✓ Cost < $10    │ │
+│ │ [? Help]│                            │                 │ │
 │ │         │                            │ Metrics:        │ │
 │ │         │                            │ Requests: 1234  │ │
-│ │         │                            │ Latency: 45ms   │ │
-│ │         │                            │ Cost: $2.50/hr  │ │
+│ │         │                            │ RPS: 25         │ │
+│ │         │                            │ P99: 45ms ✓    │ │
+│ │         │                            │ Uptime: 99.5% ✓│ │
+│ │         │                            │ Cost: $2.50 ✓  │ │
+│ │         │                            │                 │ │
+│ │         │                            │ Hints (scroll)  │ │
+│ │         │                            │ Summary         │ │
+│ │         │                            │ Test Plan       │ │
 │ └─────────┴─────────────────────────────┴─────────────────┘ │
 │ ┌─────────────────────────────────────────────────────────┐ │
-│ │ [Start] [Stop] [Submit Solution] [Back to Levels]      │ │
+│ │ [Start] [Stop] [Submit] [Show Hints]                   │ │
+│ │ [Control Center] [System Plan] [Back to Levels]        │ │
 │ └─────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
                          │ Click [Submit]
@@ -328,35 +345,142 @@ Response {
 - CPU: Low (event-driven, not polling)
 - GPU: Minimal (2D rendering only)
 
+## Architectural Hints System
+
+### Hint Display Modes
+
+```
+1. Inline Hints (Right Panel)
+   └─ Always visible, scrollable
+   └─ Updates dynamically as architecture changes
+   └─ Shows current architecture analysis
+
+2. Popup Hints Dialog
+   └─ Click "Show Hints" button
+   └─ Modal popup (700x600)
+   └─ Scrollable, focused view
+   └─ Same content as inline hints
+```
+
+### Hint Content Structure
+
+```
+SYSTEM DESIGN PRINCIPLES:
+
+1. REQUEST FLOW PATTERN
+   ├─ Basic flow diagram
+   ├─ Production flow diagram
+   ├─ Component status (✓ present, ✗ missing)
+   └─ WHY explanation for each component
+
+2. HORIZONTAL SCALABILITY
+   ├─ Scale out vs scale up principle
+   ├─ Load balancer necessity
+   ├─ Server count recommendations
+   └─ Load distribution calculations
+
+3. LATENCY OPTIMIZATION
+   ├─ Target P99 latency from level requirements
+   ├─ Cache impact (DB: 10-50ms vs Cache: 1-2ms)
+   ├─ CDN benefits for static content
+   └─ Real-world technologies (Redis, Memcached)
+
+4. HIGH AVAILABILITY
+   ├─ Uptime target with calculations
+   │   (99.9% = 3 nines = 8.76hr downtime/year)
+   ├─ SPOF (Single Point of Failure) detection
+   ├─ Redundancy requirements (N+1, Active-Active)
+   └─ Health check patterns
+
+5. TRAFFIC HANDLING
+   ├─ Peak load from level requirements
+   ├─ Users per server calculations
+   ├─ Database scaling strategies
+   └─ Connection pooling recommendations
+
+6. COST OPTIMIZATION
+   ├─ Budget from level requirements
+   ├─ Cost-saving strategies
+   ├─ Right-sizing recommendations
+   └─ Auto-scaling benefits
+
+7. COMMON MISTAKES TO AVOID
+   ├─ Single API server (SPOF)
+   ├─ No caching (high latency + DB overload)
+   ├─ No load balancer (can't scale horizontally)
+   ├─ Direct DB access from internet
+   └─ No monitoring
+```
+
+### Hint Update Flow
+
+```
+User adds/removes component
+         ↓
+Architecture analysis runs
+         ↓
+┌──────────────────────────────────┐
+│ Analyze current components:      │
+│ - Count by type                  │
+│ - Check for critical components  │
+│ - Calculate ratios               │
+└──────────────────────────────────┘
+         ↓
+Generate dynamic hints
+         ↓
+┌──────────────────────────────────┐
+│ For each principle:              │
+│ - Show status (✓/✗)             │
+│ - Calculate recommendations      │
+│ - Include WHY explanations       │
+│ - Show real-world examples       │
+└──────────────────────────────────┘
+         ↓
+Update hint displays
+         ↓
+┌──────────────────────────────────┐
+│ 1. Right panel label updates     │
+│ 2. Popup (if open) updates       │
+└──────────────────────────────────┘
+```
+
 ## Educational Progression
 
 ```
 Level 1: Basics
-  Learn: Component placement, connections
+  Learn: Component placement, connections, scenario reading
   Architecture: Single API + DB
+  Hints Focus: Basic flow, component roles
 
 Level 2: Scaling
-  Learn: Load balancing, horizontal scaling
+  Learn: Load balancing, horizontal scaling, hints usage
   Architecture: LB + Multiple APIs + DB
+  Hints Focus: Redundancy, SPOF elimination
 
 Level 3: Optimization
-  Learn: Caching, replication
+  Learn: Caching, replication, latency optimization
   Architecture: LB + APIs + Cache + Replicated DB
+  Hints Focus: Cache strategies, performance tuning
 
 Level 4: Distribution
-  Learn: Multi-region, CDN
+  Learn: Multi-region, CDN, global distribution
   Architecture: Multi-region with CDN
+  Hints Focus: Geographic distribution, edge caching
 
 Level 5: Mastery
-  Learn: Sharding, global distribution, optimization
+  Learn: Sharding, global distribution, cost optimization
   Architecture: Global multi-region with all features
+  Hints Focus: Advanced patterns, trade-offs
 ```
 
 ## Success!
 
 The game successfully teaches system design through:
 1. Visual, interactive learning
-2. Immediate feedback
-3. Progressive complexity
-4. Real-world constraints
+2. Immediate feedback with real-time metrics
+3. Progressive complexity across levels
+4. Real-world constraints (budget, latency, uptime)
 5. Hands-on experimentation
+6. Comprehensive architectural guidance (hints system)
+7. Context-aware scenario descriptions
+8. System design principles with WHY explanations

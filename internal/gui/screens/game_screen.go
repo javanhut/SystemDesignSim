@@ -208,8 +208,12 @@ func (gs *GameScreen) Build() fyne.CanvasObject {
 	rightPanel := gs.wrapPanel(metricsScroll)
 
 	header := gs.createHeader()
+	scenarioBlock := gs.createScenarioBlock()
 
-	centerPanel := container.NewBorder(header, controlsPanel, nil, nil, canvasContainer)
+	// Combine header and scenario block
+	topSection := container.NewVBox(header, scenarioBlock)
+
+	centerPanel := container.NewBorder(topSection, controlsPanel, nil, nil, canvasContainer)
 
 	mainContent := container.NewBorder(
 		nil,
@@ -541,6 +545,76 @@ func (gs *GameScreen) createHeader() fyne.CanvasObject {
 			container.NewCenter(title),
 			container.NewCenter(subtitle),
 		),
+	)
+}
+
+func (gs *GameScreen) createScenarioBlock() fyne.CanvasObject {
+	if gs.level.Scenario == nil {
+		// Show basic scenario for levels without detailed scenario
+		scenarioText := fmt.Sprintf(
+			"Objective: %s\n\n"+
+				"Challenge: Handle %d concurrent users with max %dms latency and %.1f%% uptime.\n"+
+				"Budget: $%.2f/hr | Max Error Rate: %.1f%%",
+			gs.level.Description,
+			gs.level.PeakUsers,
+			gs.level.Requirements.MaxLatencyP99.Milliseconds(),
+			gs.level.Requirements.MinUptime*100,
+			gs.level.Budget,
+			gs.level.Requirements.MaxErrorRate*100,
+		)
+
+		label := widget.NewLabel(scenarioText)
+		label.Wrapping = fyne.TextWrapWord
+		label.Alignment = fyne.TextAlignCenter
+
+		bg := canvas.NewRectangle(color.RGBA{R: 24, G: 36, B: 52, A: 255})
+		bg.StrokeColor = color.RGBA{R: 70, G: 130, B: 255, A: 100}
+		bg.StrokeWidth = 1
+		bg.CornerRadius = 8
+
+		return container.NewMax(
+			bg,
+			container.NewPadded(label),
+		)
+	}
+
+	// Detailed scenario block for levels with scenario
+	s := gs.level.Scenario
+
+	scenarioText := fmt.Sprintf(
+		"CLIENT: %s | BUSINESS: %s\n\n"+
+			"SITUATION: %s\n\n"+
+			"USERS: %d concurrent (peak: %d) | SESSION: %d min, %d page views\n"+
+			"TRAFFIC: %.0f%% reads | %.0f%% writes | %.0f%% static | Peak: %.1fx | Pattern: %s\n\n"+
+			"CONSTRAINTS: Budget $%.2f/hr | P99 Latency < %dms | Uptime > %.1f%%",
+		s.CustomerName,
+		s.BusinessType,
+		s.CurrentSituation,
+		s.UserProfile.InitialConcurrent,
+		s.UserProfile.PeakConcurrent,
+		s.UserProfile.AverageSession.DurationMinutes,
+		s.UserProfile.AverageSession.PageViews,
+		s.TrafficPattern.ReadsPercentage*100,
+		s.TrafficPattern.WritesPercentage*100,
+		s.TrafficPattern.StaticPercentage*100,
+		s.TrafficPattern.PeakMultiplier,
+		s.TrafficPattern.DailyPattern,
+		gs.level.Budget,
+		gs.level.Requirements.MaxLatencyP99.Milliseconds(),
+		gs.level.Requirements.MinUptime*100,
+	)
+
+	label := widget.NewLabel(scenarioText)
+	label.Wrapping = fyne.TextWrapWord
+
+	bg := canvas.NewRectangle(color.RGBA{R: 24, G: 36, B: 52, A: 255})
+	bg.StrokeColor = color.RGBA{R: 70, G: 130, B: 255, A: 100}
+	bg.StrokeWidth = 1
+	bg.CornerRadius = 8
+
+	return container.NewMax(
+		bg,
+		container.NewPadded(label),
 	)
 }
 
